@@ -3,12 +3,14 @@
  */
 #ifndef PS_INTERNAL_UTILS_H_
 #define PS_INTERNAL_UTILS_H_
+
 #include "dmlc/logging.h"
 #include "ps/internal/env.h"
+
 namespace ps {
 
 #ifdef _MSC_VER
-typedef signed char      int8_t;
+    typedef signed char      int8_t;
 typedef __int16          int16_t;
 typedef __int32          int32_t;
 typedef __int64          int64_t;
@@ -17,7 +19,9 @@ typedef unsigned __int16 uint16_t;
 typedef unsigned __int32 uint32_t;
 typedef unsigned __int64 uint64_t;
 #else
+
 #include <inttypes.h>
+
 #endif
 
 /*!
@@ -26,24 +30,26 @@ typedef unsigned __int64 uint64_t;
  * \param default_val the default value of environment variable.
  * \return The value received
  */
-template<typename V>
-inline V GetEnv(const char *key, V default_val) {
-  const char *val = Environment::Get()->find(key);
-  if (val == nullptr) {
-    return default_val;
-  } else {
-    return V(val);
-  }
-}
+    template<typename V>
+    inline V GetEnv(const char *key, V default_val) {
+        const char *val = Environment::Get()->find(key);
+        if (val == nullptr) {
+            return default_val;
+        } else {
+            return atoi(val);  // 默认实现，假定返回值为整数
+        }
+    }
 
-inline int GetEnv(const char *key, int default_val) {
-  const char *val = Environment::Get()->find(key);
-  if (val == nullptr) {
-    return default_val;
-  } else {
-    return atoi(val);
-  }
-}
+// 对 const char* 类型进行特化
+    template<>
+    inline const char *GetEnv<const char *>(const char *key, const char *default_val) {
+        const char *val = Environment::Get()->find(key);
+        if (val == nullptr) {
+            return default_val;
+        } else {
+            return val;  // 如果环境变量存在，则直接返回其值
+        }
+    }
 
 #ifndef DISALLOW_COPY_AND_ASSIGN
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
@@ -54,4 +60,5 @@ inline int GetEnv(const char *key, int default_val) {
 #define LL LOG(ERROR)
 
 }  // namespace ps
+
 #endif  // PS_INTERNAL_UTILS_H_
